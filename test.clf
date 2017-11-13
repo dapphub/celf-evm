@@ -1,0 +1,74 @@
+bin: type.
+
+e: bin.
+
+i: bin -> bin.
+o: bin -> bin.
+
+inc: bin -> bin -> type.
+inc/z1: inc (o X) (i X).
+inc/z2: inc e (i e).
+inc/s: inc (i X) (o Y)
+  <- inc X Y.
+
+plus: bin -> bin -> bin -> type.
+
+plus/z1: plus e e e.
+plus/z2: plus e (o N) (o N).
+plus/z3: plus e (i N) (i N).
+
+plus/z4: plus (o M) (e) (o M).
+plus/s1: plus (o M) (o N) (o R)
+  <- plus M N R.
+plus/s2: plus (o M) (i N) (i R)
+  <- plus M N R.
+
+plus/z5: plus (i M) e (i M).
+plus/s3: plus (i M) (o N) (i R)
+  <- plus M N R.
+
+plus/s4: plus (i M) (i N) (o R)
+  <- plus M N Q
+  <- inc Q R.
+
+pc: bin -> type.
+gas: bin -> type.
+sh: bin -> type.
+code: bin -> bin -> type.
+stack: bin -> bin -> type.
+
+evm/push1:
+  pc PC *
+  gas GAS *
+  code PC e *
+  code PC' V *
+  !inc PC PC' *
+  !inc PC' PC'' *
+  !plus (i (i e)) GAS GAS' *
+  sh SH *
+  !inc SH SH'
+    -o {
+      pc PC'' *
+      gas GAS' *
+      code PC e *
+      code PC' V *
+      sh SH' *
+      stack SH V
+      }.
+
+
+#query * * * 1
+  pc e *
+  code e e *
+  code (i e) (o(i e)) *
+  sh e *
+  gas e
+  -o {
+    pc (o(i e)) *
+    code e e *
+    code (i e) (o(i e)) *
+    sh (i e) *
+    gas X *
+    stack e (o (i e))
+    }.
+
