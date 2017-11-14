@@ -5,6 +5,18 @@ e: bin.
 i: bin -> bin.
 o: bin -> bin.
 
+neq: bin -> bin -> type.
+neq/z1: neq e (o X).
+neq/z2: neq e (i X).
+neq/z3: neq (o X) e.
+neq/z4: neq (i X) e.
+neq/z5: neq (o X) (i Y).
+neq/z6: neq (i X) (o Y).
+neq/s1: neq (o X) (o Y)
+  <- neq X Y.
+neq/s2: neq (i X) (i Y)
+  <- neq X Y.
+
 inc: bin -> bin -> type.
 inc/z1: inc (o X) (i X).
 inc/z2: inc e (i e).
@@ -31,20 +43,26 @@ plus/s4: plus (i M) (i N) (o R)
   <- plus M N Q
   <- inc Q R.
 
+stop: type.
 pc: bin -> type.
 gas: bin -> type.
 sh: bin -> type.
 code: bin -> bin -> type.
 stack: bin -> bin -> type.
+storage: bin -> bin -> type.
+sender: bin -> type.
+address: bin -> type.
+balance: bin -> bin -> type.
+debug: bin -> type.
 
 evm/push1:
   pc PC *
   gas GAS *
+  !plus (i (i e)) GAS GAS' *
   code PC e *
   code PC' V *
   !inc PC PC' *
   !inc PC' PC'' *
-  !plus (i (i e)) GAS GAS' *
   sh SH *
   !inc SH SH'
     -o {
@@ -56,19 +74,325 @@ evm/push1:
       stack SH V
       }.
 
+evm/sload:
+  code PC (i e) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(o(o(i(o(o(i(i e)))))))) GAS GAS' * %11001000 = 200
+  sh SH' *
+  !inc SH SH' *
+  stack SH KEY *
+  storage KEY V
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC (i e) *
+    sh SH' *
+    stack SH V *
+    storage KEY V
+  }.
+
+evm/caller:
+  code PC (o (i e)) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  sender SENDER
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC (o(i e)) *
+    sh SH' *
+    sender SENDER *
+    stack SH SENDER
+  }.
+
+evm/address:
+  code PC (i (i e)) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  address A
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC (i (i e)) *
+    sh SH' *
+    address A *
+    stack SH A
+  }.
+
+evm/eq_eqeq:
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  code PC (o (o (i e))) *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' X *
+  stack SH X
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC (o (o (i e))) *
+    sh SH' *
+    stack SH (i e)
+  }.
+
+evm/eq_neq:
+  code PC (o (o (i e))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' X *
+  stack SH Y *
+  !neq X Y
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC (o (o (i e))) *
+    sh SH' *
+    stack SH e
+  }.
+
+evm/jumpi_neq:
+  code PC (i (o (i e))) *
+  pc PC *
+  gas GAS *
+  !plus (o(i(o(i e)))) GAS GAS' * %1010 = 10 *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' NPC *
+  stack SH C *
+  !neq C e
+  -o {
+    code PC (i (o (i e))) *
+    sh SH *
+    gas GAS' *
+    pc NPC
+  }.
+
+evm/jumpi_eq:
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i(o(i e)))) GAS GAS' * %1010 = 10
+  code PC (i (o (i e))) *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' NPC *
+  stack SH e
+  -o {
+    code PC (i (o (i e))) *
+    sh SH *
+    gas GAS' *
+    pc PC'
+  }.
+
+evm/dup1:
+  code PC (o (i (i e))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (i(i e)) GAS GAS' * %11 = 3
+  sh SH' *
+  !inc SH SH' *
+  !inc SH' SH'' *
+  stack SH V
+  -o {
+    code PC (o (i (i e))) *
+    pc PC' *
+    gas GAS' *
+    sh SH'' *
+    stack SH V *
+    stack SH' V
+  }.
+
+evm/balance:
+  code PC (i (i (i e))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(o(o(o(i(o(o(i(i e))))))))) GAS GAS' * %110010000 = 200
+  sh SH' *
+  !inc SH SH' *
+  stack SH A *
+  balance A B
+  -o {
+    code PC (i (i (i e))) *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH B *
+    balance A B
+  }.
+
+evm/gas:
+  code PC (o (o (o (i e)))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o (i e)) GAS GAS' * %10 = 2
+  sh SH *
+  !inc SH SH'
+  -o {
+    code PC (o (o (o (i e)))) *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH GAS'
+  }.
+
+evm/stop:
+  code PC (i (o (o (i e)))) *
+  pc PC *
+  !inc PC PC'
+  -o {
+    code PC (i (o (o (i e)))) *
+    stop
+  }.
+
+evm/jumpdest:
+  code PC (o (i (o (i e)))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !inc GAS GAS'
+  -o {
+    code PC (i (o (o (i e)))) *
+    pc PC' *
+    gas GAS'
+  }.
+
+% SIMPLIFIED CALL - TODO
+evm/call:
+  code PC (i (i (o (i e)))) *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *                        % simplified
+  !inc GAS GAS' *                  % simplified
+  sh ST *
+  !inc _GAS ST *
+  !inc _ADDRESS _GAS *
+  !inc _VALUE _ADDRESS *
+  !inc MEM0 _VALUE *
+  !inc MEM1 MEM0 *
+  !inc SH' MEM1 *
+  !inc SH SH' *
+  stack _ADDRESS ADDRESS *
+  stack _VALUE VALUE *
+  stack _GAS TRASH *
+  stack MEM0 TRASH1 *
+  stack MEM1 TRASH2 *
+  stack SH'  TRASH3 *
+  stack SH   TRASH4 *
+  balance ADDRESS BALANCE *
+  !plus BALANCE VALUE VALUE' *
+  address Contract_Address *
+  balance Contract_Address Contract_BALANCE *
+  !plus New_Value VALUE Contract_BALANCE
+  -o {
+    code PC (i (i (o (i e)))) *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    balance ADDRESS VALUE' *
+    balance Contract_Address New_Value *
+    address Contract_Address *
+    stack SH e
+  }.
+
+
+cleanup:
+  stop *
+  code X Y
+  -o {
+    stop
+  }.
+cleanup_dirty:
+  gas X *
+  sh Y *
+  stop
+  -o {
+    stop
+  }.
+cleanup_stack:
+  stack X Y *
+  stop
+  -o {
+    stop
+  }.
+
+
+
+% #query * * * 1
+%  pc e *
+%  code e e *
+%  code (i e) (o(i e)) *
+%  sh e *
+%  gas e
+%  -o {
+%    pc (o(i e)) *
+%    code e e *
+%    code (i e) (o(i e)) *
+%    sh (i e) *
+%    gas X *
+%    stack e (o (i e))
+%    }.
 
 #query * * * 1
   pc e *
-  code e e *
-  code (i e) (o(i e)) *
   sh e *
-  gas e
-  -o {
-    pc (o(i e)) *
-    code e e *
-    code (i e) (o(i e)) *
-    sh (i e) *
-    gas X *
-    stack e (o (i e))
-    }.
+  gas e *
+  storage e Owner *
+  address Contract_Address *
+  balance Contract_Address (i e) *
+  balance Owner (i e) *
+  sender Owner *
+  !neq Contract_Address Owner *
 
+  code e                     e                 * % 0  push1
+  code (i e)                 e                 * % 1  0
+  code (o (i e))             (i e)             * % 2  sload
+  code (i (i e))             (o (i e))         * % 3  caller
+  code (o (o (i e)))         (o (o (i e)))     * % 4  eq
+  code (i (o (i e)))         e                 * % 5  push1
+  code (o (i (i e)))         (i (o (o (i e)))) * % 6  9 = 1001
+  code (i (i (i e)))         (i (o (i e)))     * % 7  jumpi
+  code (o (o (o (i e))))     (i (o (o (i e)))) * % 8  stop
+  code (i (o (o (i e))))     (o (i (o (i e)))) * % 9  jumpdest
+  code (o (i (o (i e))))     e                 * % 10 push1
+  code (i (i (o (i e))))     e                 * % 11 0
+  code (o (o (i (i e))))     (o (i (i e)))     * % 12 dup1
+  code (i (o (i (i e))))     (o (i (i e)))     * % 13 dup1
+  code (o (i (i (i e))))     (o (i (i e)))     * % 14 dup1
+  code (i (i (i (i e))))     (i (i e))         * % 15 address
+  code (o (o (o (o (i e))))) (i (i (i e)))     * % 16 balance
+  code (i (o (o (o (i e))))) (o (i e))         * % 17 caller
+  code (o (i (o (o (i e))))) (o (o (o (i e)))) * % 18 gas
+  code (i (i (o (o (i e))))) (i (i (o (i e)))) * % 19 call
+  code (o (o (i (o (i e))))) (i (o (o (i e))))   % 20 stop
+  -o {
+    storage e Owner *
+    sender Owner *
+    address Contract_Address *
+    balance Owner (o (i e)) *
+    balance Contract_Address e *
+    stop
+  }
+  .
