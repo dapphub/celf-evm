@@ -1,0 +1,44 @@
+bin: type.
+
+e: bin.
+
+i: bin -> bin.
+o: bin -> bin.
+
+neq: bin -> bin -> type.
+neq/z1: neq e (o X).
+neq/z2: neq e (i X).
+neq/z3: neq (o X) e.
+neq/z4: neq (i X) e.
+neq/z5: neq (o X) (i Y).
+neq/z6: neq (i X) (o Y).
+neq/s1: neq (o X) (o Y)
+  <- neq X Y.
+neq/s2: neq (i X) (i Y)
+  <- neq X Y.
+
+inc: bin -> bin -> type.
+inc/z1: inc (o X) (i X).
+inc/z2: inc e (i e).
+inc/s: inc (i X) (o Y)
+  <- inc X Y.
+
+plus: bin -> bin -> bin -> type.
+
+plus/z1: plus e e e.
+plus/z2: plus e (o N) (o N).
+plus/z3: plus e (i N) (i N).
+
+plus/z4: plus (o M) (e) (o M).
+plus/s1: plus (o M) (o N) (o R)
+  <- plus M N R.
+plus/s2: plus (o M) (i N) (i R)
+  <- plus M N R.
+
+plus/z5: plus (i M) e (i M).
+plus/s3: plus (i M) (o N) (i R)
+  <- plus M N R.
+
+plus/s4: plus (i M) (i N) (o R)
+  <- plus M N Q
+  <- inc Q R.

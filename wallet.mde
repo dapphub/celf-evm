@@ -1,0 +1,71 @@
+#import(bin.mde)
+#import(evm.mde)
+
+cleanup:
+  stop *
+  code X Y
+  -o {
+    stop
+  }.
+cleanup_dirty:
+  gas X *
+  sh Y *
+  stop
+  -o {
+    stop
+  }.
+cleanup_stack:
+  stack X Y *
+  stop
+  -o {
+    stop
+  }.
+
+#trace *
+  pc                             N_00  *
+  sh                             N_00  *
+  gas                            N_00  *
+
+  storage     N_00               Owner *
+  address     Contract_Address         *
+  sender      Owner                    *
+  balance     Contract_Address   WB    *
+  balance     Owner              OB    *
+  !neq        Contract_Address   Owner *
+
+  % necessary for the prover
+  % TODO - find a way to do it on the fly
+  !plus OB WB TotalValue *
+  !plus N_00 WB WB *
+
+  code N_00   N_60  * % PUSH1
+  code N_01   N_00  * % 0
+  code N_02   N_54  * % SLOAD
+  code N_03   N_33  * % CALLER
+  code N_04   N_14  * % EQ
+  code N_05   N_60  * % PUSH1
+  code N_06   N_09  * % 9
+  code N_07   N_57  * % JUMPI
+  code N_08   N_00  * % STOP
+  code N_09   N_5b  * % JUMPDEST
+  code N_0a   N_60  * % PUSH1
+  code N_0b   N_00  * % 0
+  code N_0c   N_80  * % DUP1
+  code N_0d   N_80  * % DUP1
+  code N_0e   N_80  * % DUP1
+  code N_0f   N_30  * % ADDRESS
+  code N_10   N_31  * % BALANCE
+  code N_11   N_33  * % CALLER
+  code N_12   N_5a  * % GAS
+  code N_13   N_f1  * % CALL
+  code N_14   N_00    % STOP
+
+%  -o {
+%    storage e Owner *
+%    sender Owner *
+%    address Contract_Address *
+%    balance Owner (o (i e)) *
+%    balance Contract_Address e *
+%    stop
+%  }
+  .

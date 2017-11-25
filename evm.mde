@@ -1,0 +1,273 @@
+stop: type.
+pc: bin -> type.
+gas: bin -> type.
+sh: bin -> type.
+code: bin -> bin -> type.
+stack: bin -> bin -> type.
+storage: bin -> bin -> type.
+sender: bin -> type.
+address: bin -> type.
+balance: bin -> bin -> type.
+debug: bin -> type.
+
+evm/push1:
+  code PC N_60 *
+  pc PC *
+  gas GAS *
+  !plus (i (i e)) GAS GAS' *
+  code PC' V *
+  !inc PC PC' *
+  !inc PC' PC'' *
+  sh SH *
+  !inc SH SH'
+    -o {
+      pc PC'' *
+      gas GAS' *
+      code PC N_60 *
+      code PC' V *
+      sh SH' *
+      stack SH V
+      }.
+
+evm/sload:
+  code PC N_54 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus N_200 GAS GAS' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH KEY *
+  storage KEY V
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_54 *
+    sh SH' *
+    stack SH V *
+    storage KEY V
+  }.
+
+evm/caller:
+  code PC N_33 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  sender SENDER
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_33 *
+    sh SH' *
+    sender SENDER *
+    stack SH SENDER
+  }.
+
+evm/address:
+  code PC N_30 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  address A
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_30 *
+    sh SH' *
+    address A *
+    stack SH A
+  }.
+
+evm/eq_eqeq:
+  code PC N_14 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' X *
+  stack SH X
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_14 *
+    sh SH' *
+    stack SH (i e)
+  }.
+
+evm/eq_neq:
+  code PC N_14 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' X *
+  stack SH Y *
+  !neq X Y
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_14 *
+    sh SH' *
+    stack SH e
+  }.
+
+evm/jumpi_neq:
+  code PC N_57 *
+  pc PC *
+  gas GAS *
+  !plus (o(i(o(i e)))) GAS GAS' * %1010 = 10 *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' NPC *
+  stack SH C *
+  !neq C e
+  -o {
+    code PC N_57 *
+    sh SH *
+    gas GAS' *
+    pc NPC
+  }.
+
+evm/jumpi_eq:
+  code PC N_57 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus N_10 GAS GAS' *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' NPC *
+  stack SH e
+  -o {
+    code PC N_57 *
+    sh SH *
+    gas GAS' *
+    pc PC'
+  }.
+
+evm/dup1:
+  code PC N_80 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (i(i e)) GAS GAS' * %11 = 3
+  sh SH' *
+  !inc SH SH' *
+  !inc SH' SH'' *
+  stack SH V
+  -o {
+    code PC N_80 *
+    pc PC' *
+    gas GAS' *
+    sh SH'' *
+    stack SH V *
+    stack SH' V
+  }.
+
+evm/balance:
+  code PC N_31 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus N_200 GAS GAS' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH A *
+  balance A B
+  -o {
+    code PC N_31 *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH B *
+    balance A B
+  }.
+
+evm/gas:
+  code PC N_5a *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o (i e)) GAS GAS' * %10 = 2
+  sh SH *
+  !inc SH SH'
+  -o {
+    code PC N_5a *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH GAS'
+  }.
+
+evm/stop:
+  code PC N_00 *
+  pc PC *
+  !inc PC PC'
+  -o {
+    code PC N_00 *
+    stop
+  }.
+
+evm/jumpdest:
+  code PC N_5b *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !inc GAS GAS'
+  -o {
+    code PC N_5b *
+    pc PC' *
+    gas GAS'
+  }.
+
+% SIMPLIFIED CALL - TODO
+evm/call:
+  code PC N_f1 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *                        % simplified
+  !inc GAS GAS' *                  % simplified
+  sh ST *
+  !inc _GAS ST *
+  !inc _ADDRESS _GAS *
+  !inc _VALUE _ADDRESS *
+  !inc MEM0 _VALUE *
+  !inc MEM1 MEM0 *
+  !inc SH' MEM1 *
+  !inc SH SH' *
+  stack _ADDRESS ADDRESS *
+  stack _VALUE VALUE *
+  stack _GAS TRASH *
+  stack MEM0 TRASH1 *
+  stack MEM1 TRASH2 *
+  stack SH'  TRASH3 *
+  stack SH   TRASH4 *
+  !plus BALANCE VALUE VALUE' *
+  !plus New_Value VALUE Contract_BALANCE *
+  balance ADDRESS BALANCE *
+  address Contract_Address *
+  balance Contract_Address Contract_BALANCE
+  -o {
+    code PC N_f1 *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    address Contract_Address *
+    stack SH N_00 *
+    balance ADDRESS VALUE' *
+    balance Contract_Address New_Value
+  }.

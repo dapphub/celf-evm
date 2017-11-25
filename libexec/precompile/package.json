@@ -1,0 +1,14 @@
+{
+  "name": "celf_helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "precompile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bn.js": "^4.11.8"
+  }
+}
