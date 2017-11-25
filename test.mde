@@ -1,0 +1,16 @@
+#import(bin.mde)
+
+debug: bin -> type.
+debug2: bin -> type.
+
+ddd:
+  debug X *
+%  !mul N_05 X Z
+  !plus Z X N_05
+  -o {
+    debug2 Z
+  }.
+
+#trace *
+  debug N_04
+  .

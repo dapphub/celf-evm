@@ -1,3 +1,53 @@
+% EVM
+%
+% 00   STOP
+% 01   ADD           *
+% 02   MUL           *
+% 03   SUB           *
+
+% 10   LT            TODO
+% 11   GT            TODO
+% 14   EQ
+% 15   ISZERO        TODO
+% 16   AND           TODO
+% 17   OR            TODO
+% 19   NOT           TODO
+
+% 20   SHA3          TODO
+
+% 30   ADDRESS
+% 31   BALANCE
+% 33   CALLER
+% 34   CALLVALUE     TODO
+% 35   CALLDATALOAD  TODO
+% 36   CALLDATASIZE  TODO
+% 37   CALLDATACOPY  TODO
+
+% 42   TIMESTAMP     TODO
+% 45   GASLIMIT      TODO
+
+% 54   SLOAD
+% 55   SSTORE        TODO
+% 56   JUMP          TODO
+% 57   JUMPI
+% 5a   GAS
+% 5b   JUMPDEST
+
+% 60   PUSH1
+% 73   PUSH20        TODO
+
+% 80   DUP1
+% 81   DUP2          TODO
+% 82   DUP3          TODO
+
+% 90   SWAP1         TODO
+
+% a4   LOG4          TODO
+
+% f1   CALL
+% fe   INVALID       TODO
+%
+
 stop: type.
 pc: bin -> type.
 gas: bin -> type.
@@ -10,79 +60,73 @@ address: bin -> type.
 balance: bin -> bin -> type.
 debug: bin -> type.
 
-evm/push1:
-  code PC N_60 *
-  pc PC *
-  gas GAS *
-  !plus (i (i e)) GAS GAS' *
-  code PC' V *
-  !inc PC PC' *
-  !inc PC' PC'' *
-  sh SH *
-  !inc SH SH'
-    -o {
-      pc PC'' *
-      gas GAS' *
-      code PC N_60 *
-      code PC' V *
-      sh SH' *
-      stack SH V
-      }.
 
-evm/sload:
-  code PC N_54 *
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  00
+
+evm/stop:
+  code PC N_00 *
   pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !plus N_200 GAS GAS' *
-  sh SH' *
-  !inc SH SH' *
-  stack SH KEY *
-  storage KEY V
+  !inc PC PC'
   -o {
-    pc PC' *
-    gas GAS' *
-    code PC N_54 *
-    sh SH' *
-    stack SH V *
-    storage KEY V
+    code PC N_00 *
+    stop
   }.
 
-evm/caller:
-  code PC N_33 *
+evm/add:
+  code PC N_01 *
   pc PC *
   !inc PC PC' *
-  gas GAS *
-  !plus (o(i e)) GAS GAS' * %10 = 2 *
-  sh SH *
+  sh SH'' *
+  !inc SH' SH'' *
   !inc SH SH' *
-  sender SENDER
+  stack SH' A *
+  stack SH  B *
+  !plus A B C
   -o {
+    code PC N_01 *
     pc PC' *
-    gas GAS' *
-    code PC N_33 *
     sh SH' *
-    sender SENDER *
-    stack SH SENDER
+    stack SH C
   }.
 
-evm/address:
-  code PC N_30 *
+evm/mul:
+  code PC N_02 *
   pc PC *
   !inc PC PC' *
-  gas GAS *
-  !plus (o(i e)) GAS GAS' * %10 = 2 *
-  sh SH *
+  sh SH'' *
+  !inc SH' SH'' *
   !inc SH SH' *
-  address A
+  stack SH' A *
+  stack SH  B *
+  !mul A B C
   -o {
+    code PC N_01 *
     pc PC' *
-    gas GAS' *
-    code PC N_30 *
     sh SH' *
-    address A *
-    stack SH A
+    stack SH C
   }.
+
+evm/sub:
+  code PC N_02 *
+  pc PC *
+  !inc PC PC' *
+  sh SH'' *
+  !inc SH' SH'' *
+  !inc SH SH' *
+  stack SH' A *
+  stack SH  B *
+  !plus C B A
+  -o {
+    code PC N_01 *
+    pc PC' *
+    sh SH' *
+    stack SH C
+  }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  10
 
 evm/eq_eqeq:
   code PC N_14 *
@@ -123,6 +167,89 @@ evm/eq_neq:
     stack SH e
   }.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  20
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  30
+
+evm/address:
+  code PC N_30 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  address A
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_30 *
+    sh SH' *
+    address A *
+    stack SH A
+  }.
+
+evm/balance:
+  code PC N_31 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus N_200 GAS GAS' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH A *
+  balance A B
+  -o {
+    code PC N_31 *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH B *
+    balance A B
+  }.
+
+evm/caller:
+  code PC N_33 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o(i e)) GAS GAS' * %10 = 2 *
+  sh SH *
+  !inc SH SH' *
+  sender SENDER
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_33 *
+    sh SH' *
+    sender SENDER *
+    stack SH SENDER
+  }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  40
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  50
+
+
+evm/sload:
+  code PC N_54 *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus N_200 GAS GAS' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH KEY *
+  storage KEY V
+  -o {
+    pc PC' *
+    gas GAS' *
+    code PC N_54 *
+    sh SH' *
+    stack SH V *
+    storage KEY V
+  }.
+
 evm/jumpi_neq:
   code PC N_57 *
   pc PC *
@@ -159,6 +286,59 @@ evm/jumpi_eq:
     pc PC'
   }.
 
+evm/gas:
+  code PC N_5a *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !plus (o (i e)) GAS GAS' * %10 = 2
+  sh SH *
+  !inc SH SH'
+  -o {
+    code PC N_5a *
+    pc PC' *
+    gas GAS' *
+    sh SH' *
+    stack SH GAS'
+  }.
+
+evm/jumpdest:
+  code PC N_5b *
+  pc PC *
+  !inc PC PC' *
+  gas GAS *
+  !inc GAS GAS'
+  -o {
+    code PC N_5b *
+    pc PC' *
+    gas GAS'
+  }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  60
+
+evm/push1:
+  code PC N_60 *
+  pc PC *
+  gas GAS *
+  !plus (i (i e)) GAS GAS' *
+  code PC' V *
+  !inc PC PC' *
+  !inc PC' PC'' *
+  sh SH *
+  !inc SH SH'
+    -o {
+      pc PC'' *
+      gas GAS' *
+      code PC N_60 *
+      code PC' V *
+      sh SH' *
+      stack SH V
+      }.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  70
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  80
+
 evm/dup1:
   code PC N_80 *
   pc PC *
@@ -178,61 +358,19 @@ evm/dup1:
     stack SH' V
   }.
 
-evm/balance:
-  code PC N_31 *
-  pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !plus N_200 GAS GAS' *
-  sh SH' *
-  !inc SH SH' *
-  stack SH A *
-  balance A B
-  -o {
-    code PC N_31 *
-    pc PC' *
-    gas GAS' *
-    sh SH' *
-    stack SH B *
-    balance A B
-  }.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  90
 
-evm/gas:
-  code PC N_5a *
-  pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !plus (o (i e)) GAS GAS' * %10 = 2
-  sh SH *
-  !inc SH SH'
-  -o {
-    code PC N_5a *
-    pc PC' *
-    gas GAS' *
-    sh SH' *
-    stack SH GAS'
-  }.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  a0
 
-evm/stop:
-  code PC N_00 *
-  pc PC *
-  !inc PC PC'
-  -o {
-    code PC N_00 *
-    stop
-  }.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  b0
 
-evm/jumpdest:
-  code PC N_5b *
-  pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !inc GAS GAS'
-  -o {
-    code PC N_5b *
-    pc PC' *
-    gas GAS'
-  }.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  c0
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  d0
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  e0
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  f0
 
 % SIMPLIFIED CALL - TODO
 evm/call:

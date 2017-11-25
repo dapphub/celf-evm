@@ -5,6 +5,9 @@ e: bin.
 i: bin -> bin.
 o: bin -> bin.
 
+eq: bin -> bin -> type.
+eq/z: eq X X.
+
 neq: bin -> bin -> type.
 neq/z1: neq e (o X).
 neq/z2: neq e (i X).
@@ -42,3 +45,15 @@ plus/s3: plus (i M) (o N) (i R)
 plus/s4: plus (i M) (i N) (o R)
   <- plus M N Q
   <- inc Q R.
+
+mul: bin -> bin -> bin -> type.
+
+mul/z1: mul e Y e.
+
+mul/s1: mul (o X) Y Z
+  <- mul X (o Y) Z.
+
+mul/s2: mul (i X) Y Z'
+  <- mul X (o Y) Z
+  <- plus Y Z Z'.
+
