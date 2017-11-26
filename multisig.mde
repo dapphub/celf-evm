@@ -1,0 +1,61 @@
+#import(bin.mde)
+#import(evm.mde)
+
+cleanup:
+  stop *
+  code X Y
+  -o {
+    stop
+  }.
+cleanup_dirty:
+  gas X *
+  sh Y *
+  stop
+  -o {
+    stop
+  }.
+cleanup_stack:
+  stack X Y *
+  stop
+  -o {
+    stop
+  }.
+
+#exec *
+  pc                             N_00  *
+  sh                             N_00  *
+  gas                            N_00  *
+
+  %%% assumptions
+
+  address     Contract_Address         *
+  sender      Sender                   *
+  balance     Contract_Address   WB    *
+  !neq        Contract_Address   Owner *
+  !eq        Sender
+    A_4f26ffbe5f04ed43630fdc30a87638d53d0b0876 *
+  !neq        Sender
+    A_db33dfd3d61308c33c63209845dad3e6bfb2c674 *
+  !neq        Sender
+    A_c9107bd75a6971d9beaba390a28ab9bb30adc9bc *
+  !neq        Sender
+    A_61bf84d5ab026f58c873f86ff0dfca82b50033ae *
+  !neq        Sender
+    A_855be87fe5ddea2761dbd97f1a4e800aa00a15fd *
+  !neq        Sender
+    A_6ea073f4de9cd42955539033091ae587c06a882c *
+
+  #import(multisig_code.mde)
+
+  !neq        Sender Owner
+
+
+%  -o {
+%    storage e Owner *
+%    sender Owner *
+%    address Contract_Address *
+%    balance Owner (o (i e)) *
+%    balance Contract_Address e *
+%    stop
+%  }
+  .

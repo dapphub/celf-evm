@@ -28,10 +28,11 @@ cleanup_stack:
 
   storage     N_00               Owner *
   address     Contract_Address         *
-  sender      Owner                    *
+  sender      Sender                   *
   balance     Contract_Address   WB    *
   balance     Owner              OB    *
   !neq        Contract_Address   Owner *
+  !neq        Sender Owner             *
 
   % necessary for the prover
   % TODO - find a way to do it on the fly

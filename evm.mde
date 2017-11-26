@@ -128,26 +128,26 @@ evm/sub:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  10
 
-evm/eq_eqeq:
-  code PC N_14 *
-  pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !plus (o(i e)) GAS GAS' * %10 = 2 *
-  sh SH'' *
-  !inc SH' SH'' *
-  !inc SH SH' *
-  stack SH' X *
-  stack SH X
-  -o {
-    pc PC' *
-    gas GAS' *
-    code PC N_14 *
-    sh SH' *
-    stack SH (i e)
-  }.
+%evm/eq_eqeq:
+%  code PC N_14 *
+%  pc PC *
+%  !inc PC PC' *
+%  gas GAS *
+%  !plus (o(i e)) GAS GAS' * %10 = 2 *
+%  sh SH'' *
+%  !inc SH' SH'' *
+%  !inc SH SH' *
+%  stack SH' X *
+%  stack SH X
+%  -o {
+%    pc PC' *
+%    gas GAS' *
+%    code PC N_14 *
+%    sh SH' *
+%    stack SH (i e)
+%  }.
 
-evm/eq_neq:
+evm/eq:
   code PC N_14 *
   pc PC *
   !inc PC PC' *
@@ -157,14 +157,18 @@ evm/eq_neq:
   !inc SH' SH'' *
   !inc SH SH' *
   stack SH' X *
-  stack SH Y *
-  !neq X Y
+  stack SH Y
   -o {
     pc PC' *
     gas GAS' *
     code PC N_14 *
     sh SH' *
-    stack SH e
+    ((!neq X Y -o {
+      stack SH e
+    }) &
+    (!eq X Y -o {
+      stack SH (i e)
+    }))
   }.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  20
@@ -248,6 +252,21 @@ evm/sload:
     sh SH' *
     stack SH V *
     storage KEY V
+  }.
+
+evm/jump:
+  code PC N_56 *
+  pc PC *
+  gas GAS *
+  !plus N_08 GAS GAS' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH V
+  -o {
+    code PC N_56 *
+    pc V *
+    sh SH *
+    gas GAS'
   }.
 
 evm/jumpi_neq:
@@ -334,6 +353,46 @@ evm/push1:
       sh SH' *
       stack SH V
       }.
+
+% pushat PC x PC_Target
+pushat: bin -> bin -> type.
+pushat/z:
+  pushat PC PC
+  -o {
+    pc PC
+  }.
+pushat/s:
+  pushat PC PC_Target *
+  !neq PC PC_Target *
+  code PC V *
+  !inc PC PC' *
+  sh SH' *
+  !inc SH SH' *
+  stack SH Number *
+  !plus (o (o (o (o (o (o (o (o Number)))))))) V V'
+  -o {
+    pushat PC' PC_Target *
+    code PC V *
+    sh SH' *
+    stack SH V'
+  }.
+
+evm/push20:
+  code PC N_73 *
+  pc PC *
+  !inc PC PC' *
+  !plus N_15 PC PC_Target *
+  gas GAS *
+  !plus (i (i e)) GAS GAS' *
+  sh SH *
+  !inc SH SH'
+  -o {
+    code PC N_73 *
+    pushat PC' PC_Target *
+    sh SH' *
+    stack SH e *
+    gas GAS'
+  }.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  70
 
