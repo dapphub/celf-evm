@@ -49,7 +49,8 @@ data = traces.map(function (val, i) {
       if(hex.length % 2 === 1) hex = "0"+hex;
       return " "+hex
     }))
-  .map(e => e.replace(/\(sha3\W+(\d+)/, (v, m)=>`sha3(${m})`))
+    .map(e => e.replace(/\(sha3\W+(\d+)/, (v, m)=>`sha3(${m})`))
+    .map(e => e.replace(/\Wee/g, " 0"))
     .sort()
   let table = ctxArray
     .map(e => e.split(" "));
