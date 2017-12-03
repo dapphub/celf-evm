@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bn.js": "^4.11.8"
+    "bn.js": "^4.11.8",
+    "colors": "^1.1.2"
   }
 }

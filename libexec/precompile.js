@@ -16,7 +16,9 @@ const link = function (filepath) {
 
   data = data.replace(/N_([[0-9a-f]*)/g, (match, number) => {
     var n = new BN(number, 16);
-    var str = n.toString(2).split('').reverse();
+    var str = n.toString(2);
+    str = "0".repeat(256-str.length) + str;
+    str = str.split('').reverse();
     const toType = v => v === "0" ? "o" : "i";
     var toBin = (str) => {
       if(str.length === 1) return "(" + toType(str[0])+ " e)"
@@ -27,12 +29,14 @@ const link = function (filepath) {
 
   data = data.replace(/A_([[0-9a-f]*)/g, (match, number) => {
     var n = new BN(number, 16);
-    var str = n.toString(2).split('').reverse();
-    if(str.length % 8 !== 0) {
-      for(var i=str.length % 8; i<8; i++ ) {
-        str = str.concat(["0"]);
-      }
-    }
+    var str = n.toString(2)
+    str = "0".repeat(256-str.length) + str;
+    str = str.split('').reverse();
+    // if(str.length % 8 !== 0) {
+    //   for(var i=str.length % 8; i<8; i++ ) {
+    //     str = str.concat(["0"]);
+    //   }
+    // }
     const toType = v => v === "0" ? "o" : "i";
     var toBin = (str) => {
       if(str.length === 1) return "(" + toType(str[0])+ " e)"

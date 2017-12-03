@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 libexec/precompile.js $1 out/mde.clf
-celf out/mde.clf |perl -pe 's/, ([^\n])/\n   $1/g'
+echo "running..."
+celf out/mde.clf -s 2 > out/mde.out
+libexec/parseoutput.js out/mde.out $2

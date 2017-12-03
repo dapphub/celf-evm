@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+libexec/precompile.js $1 out/mde.clf
+celf out/mde.clf

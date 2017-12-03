@@ -5,6 +5,15 @@ e: bin.
 i: bin -> bin.
 o: bin -> bin.
 
+nat: type.
+ee: nat.
+s: nat -> nat.
+
+bool: type.
+t: bool.
+f: bool.
+
+
 eq: bin -> bin -> type.
 eq/z: eq X X.
 
@@ -56,4 +65,157 @@ mul/s1: mul (o X) Y Z
 mul/s2: mul (i X) Y Z'
   <- mul X (o Y) Z
   <- plus Y Z Z'.
+
+
+%   X      Y      ass.   res.
+gt: bin -> bin -> bin -> bin -> type.
+
+
+gt/s_ii: gt (i X) (i Y) A R
+  <- gt X Y A R.
+
+gt/s_io: gt (i X) (o Y) A R
+  <- gt X Y (i e) R.
+
+gt/s_ie: gt (i X) e A (i e).
+
+gt/s_oi: gt (o X) (i Y) A R
+  <- gt X Y (o e) R.
+
+gt/s_oo: gt (o X) (o Y) A R
+  <- gt X Y A R.
+
+gt/s_oe: gt (o X) e A R
+  <- gt X e A R.
+
+gt/s_ei: gt e (i Y) A (o e).
+
+gt/s_eo: gt e (o Y) A R
+  <- gt e Y A R.
+
+gt/s_ee: gt e e A A.
+
+
+exp: bin -> bin -> bin -> type.
+
+exp/z: exp X e (i e).
+
+exp/so: exp X (o Y) Z
+  <- mul X X X'
+  <- exp X' Y Z.
+
+exp/si: exp X (i Y) Z'
+  <- mul X X X'
+  <- exp X' Y Z
+  <- mul Z X Z'.
+
+and: bin -> bin -> bin -> type.
+and/zl: and e Y e.
+and/zr: and X e e.
+and/sii: and (i X) (i Y) (i Z)
+  <- and X Y Z.
+
+and/soi: and (o X) (i Y) (o Z)
+  <- and X Y Z.
+and/sio: and (i X) (o Y) (o Z)
+  <- and X Y Z.
+and/soo: and (o X) (o Y) (o Z)
+  <- and X Y Z.
+
+
+or: bin -> bin -> bin -> type.
+or/zl: or e Y Y.
+or/zr: or X e X.
+or/sii: or (i X) (i Y) (i Z)
+  <- or X Y Z.
+
+or/soi: or (o X) (i Y) (i Z)
+  <- or X Y Z.
+or/sio: or (i X) (o Y) (i Z)
+  <- or X Y Z.
+or/soo: or (o X) (o Y) (o Z)
+  <- or X Y Z.
+
+not: bin -> bin -> type.
+not/z: not e e.
+not/si: not (i X) (o Y)
+  <- not X Y.
+
+not/so: not (o X) (i Y)
+  <- not X Y.
+
+% to256Helper: bin -> bin -> bin -> type.
+%
+%to256Helper/z: to256Helper e N
+%
+to256: bin -> bin -> type.
+
+length: bin -> nat -> type.
+length/z: length e ee.
+length/si: length (i X) (s Y)
+  <- length X Y.
+
+length/so: length (o X) (s Y)
+  <- length X Y.
+
+%trim: bin -> nat -> bin -> type.
+%trim/z: trim X ee X.
+%trim/si: trim (i X) (s L) Y
+%  <- trim X L Y.
+%trim/so: trim (o X) (s L) Y
+%  <- trim X L Y.
+
+%concat: bin -> bin -> bin -> type.
+%concat/z: concat e Y Y.
+%concat/si: concat (i X) Y (i Z)
+%  <- concat X Y Z.
+%concat/so: concat (o X) Y (o Z)
+%  <- concat X Y Z.
+
+% TODO - see if i can abstract this number away.
+%to256/z: to256 X Y
+%  <- length X L
+%  <- trim (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o e)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) L Z
+%  <- concat Z X Y.
+
+
+%reverse: bin -> bin -> type.
+%reverse/z: reverse e e.
+%reverse/s1: reverse (i X)
+
+to256/z: to256 X Y
+  <- or X (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o (o e)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))) Y.
+
+
+reverse: bin -> bin -> type.
+reverse_h: bin -> bin -> bin -> type.
+
+reverse/z: reverse X Y
+  <- reverse_h X e Y.
+
+
+reverse_h/z: reverse_h e Y Y.
+reverse_h/si: reverse_h (i X) Y Z
+  <- reverse_h X (i Y) Z.
+reverse_h/so: reverse_h (o X) Y Z
+  <- reverse_h X (o Y) Z.
+
+trim: bin -> bin -> type.
+
+%       curr   trim   orig   res
+trim_h: bin -> bin -> bin -> bin -> type.
+
+trim_h/z: trim_h e X Y Z
+  <- reverse X Z.
+
+trim_h/si: trim_h (i N) X Y Z
+  <- trim_h N (i Y) (i Y) Z.
+
+trim_h/so: trim_h (o N) X Y Z
+  <- trim_h N X (o Y) Z.
+
+trim/z: trim X Y
+  <- trim_h X e e Y.
+
+
 
