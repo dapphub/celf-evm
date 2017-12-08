@@ -9,16 +9,12 @@ nat: type.
 ee: nat.
 s: nat -> nat.
 
-bool: type.
-t: bool.
-f: bool.
-
-
 eq: bin -> bin -> type.
 eq/z: eq X X.
 
 neq: bin -> bin -> type.
-neq/z1: neq e (o X).
+
+neq/z1: neq e (o Y).
 neq/z2: neq e (i X).
 neq/z3: neq (o X) e.
 neq/z4: neq (i X) e.

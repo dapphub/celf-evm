@@ -68,12 +68,13 @@ callvalue: bin -> type.
 calldata: bin -> bin -> bin -> type.
 calldatasize: bin -> type.
 debug: bin -> type.
-memory: bin -> bin -> type.
+memory: bin -> bin -> bin -> type.
 mh: bin -> type.
 timestamp: bin -> type.
 gaslimit: bin -> type.
+concat: bin -> bin -> bin.
 sha3: bin -> bin.
-
+call: bin -> bin -> bin -> bin -> bin -> bin -> bin -> type.
 
 
 
@@ -81,8 +82,8 @@ sha3: bin -> bin.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  00
 
 evm/stop:
-  code PC N_00 *
   pc PC *
+  code PC N_00 *
   !inc PC PC'
   -o {
     code PC N_00 *
@@ -90,8 +91,8 @@ evm/stop:
   }.
 
 evm/add:
-  code PC N_01 *
   pc PC *
+  code PC N_01 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) A *
@@ -105,8 +106,8 @@ evm/add:
   }.
 
 evm/mul:
-  code PC N_02 *
   pc PC *
+  code PC N_02 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) A *
@@ -123,8 +124,8 @@ evm/mul:
   }.
 
 evm/sub:
-  code PC N_03 *
   pc PC *
+  code PC N_03 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) A *
@@ -138,8 +139,8 @@ evm/sub:
   }.
 
 evm/exp:
-  code PC N_0a *
   pc PC *
+  code PC N_0a *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) Base *
@@ -179,8 +180,8 @@ evm/exp:
 %  }.
 
 evm/eq:
-  code PC N_14 *
   pc PC *
+  code PC N_14 *
   !inc PC PC' *
   gas GAS *
   !plus (o(i e)) GAS GAS' * %10 = 2 *
@@ -200,26 +201,42 @@ evm/eq:
     }))
   }.
 
-evm/iszero:
-  code PC N_15 *
+evm/iszero_eq:
   pc PC *
+  code PC N_15 *
   !inc PC PC' *
   gas GAS *
   !inc GAS GAS' *
   sh (s SH) *
-  stack SH V
+  stack SH N_00
   -o {
     code PC N_15 *
     pc PC' *
     gas GAS' *
     sh (s SH) *
-    ((!eq V N_00 -o {stack SH N_01}) &
-    (!neq V N_00 -o {stack SH N_00}))
+    stack SH N_01
+  }.
+
+evm/iszero_neq:
+  pc PC *
+  code PC N_15 *
+  !inc PC PC' *
+  gas GAS *
+  !inc GAS GAS' *
+  sh (s SH) *
+  stack SH V *
+  !neq V N_00
+  -o {
+    code PC N_15 *
+    pc PC' *
+    gas GAS' *
+    sh (s SH) *
+    stack SH N_00
   }.
 
 evm/lt:
-  code PC N_10 *
   pc PC *
+  code PC N_10 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) X *
@@ -234,8 +251,8 @@ evm/lt:
   }.
 
 evm/gt:
-  code PC N_11 *
   pc PC *
+  code PC N_11 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) X *
@@ -250,8 +267,8 @@ evm/gt:
   }.
 
 evm/and:
-  code PC N_16 *
   pc PC *
+  code PC N_16 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) X *
@@ -265,8 +282,8 @@ evm/and:
   }.
 
 evm/or:
-  code PC N_17 *
   pc PC *
+  code PC N_17 *
   !inc PC PC' *
   sh (s (s SH)) *
   stack (s SH) X *
@@ -280,8 +297,8 @@ evm/or:
   }.
 
 evm/not:
-  code PC N_19 *
   pc PC *
+  code PC N_19 *
   !inc PC PC' *
   sh (s SH) *
   stack SH X *
@@ -297,31 +314,48 @@ evm/not:
 
 % TODO - dirty -.-, I don't want to implemet sha3 in here
 % TODO - summ over memory
-evm/sha3:
-  code PC N_20 *
-  pc PC *
-  !inc PC PC' *
-  gas GAS *
-  !inc GAS GAS' *
-  sh (s (s SH)) *
-  stack (s SH) From *
-  stack SH  To   *
-  memory From V
+
+concatMemory: bin -> bin -> bin -> type.
+unblockConcatMemory: bin -> type.
+concatMemory/z: concatMemory X X Z
   -o {
-%    sha3 V V' *
-    code PC N_20 *
-    pc PC' *
-    gas GAS' *
-    stack SH (sha3 V) *
-    sh (s SH) *
-    memory From V
+    unblockConcatMemory Z
+  }.
+concatMemory/s:
+  concatMemory Pos To Z *
+  !neq Pos To           *
+  memory Pos Size V     *
+  !plus Pos Size Pos'
+  -o {
+    memory Pos Size V *
+    concatMemory Pos' To (concat Z V)
+  }.
+
+evm/sha3:
+  pc PC             *
+  code PC N_20      *
+  !inc PC PC'       *
+  gas GAS           *
+  !inc GAS GAS'     *
+  sh (s (s SH))     *
+  stack (s SH) From *
+  stack SH  To
+  -o {
+    concatMemory From To e *
+    (unblockConcatMemory Z -o {
+      code PC N_20 *
+      pc PC' *
+      gas GAS' *
+      stack SH (sha3 Z) *
+      sh (s SH)
+    })
   }.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  30
 
 evm/address:
-  code PC N_30 *
   pc PC *
+  code PC N_30 *
   !inc PC PC' *
   gas GAS *
   !plus (o(i e)) GAS GAS' * %10 = 2 *
@@ -337,8 +371,8 @@ evm/address:
   }.
 
 evm/balance:
-  code PC N_31 *
   pc PC *
+  code PC N_31 *
   !inc PC PC' *
   gas GAS *
   !plus N_200 GAS GAS' *
@@ -355,8 +389,8 @@ evm/balance:
   }.
 
 evm/caller:
-  code PC N_33 *
   pc PC *
+  code PC N_33 *
   !inc PC PC' *
   gas GAS *
   !plus (o(i e)) GAS GAS' * %10 = 2 *
@@ -438,8 +472,8 @@ evm/callvalue:
 % TODO
 % current assumption: calldatasize < 32
 evm/calldataload:
-  code       PC    N_35 *
   pc         PC         *
+  code       PC    N_35 *
   !inc       PC    PC'  *
   sh         (s SH)     *
   stack      SH    POS  *
@@ -453,8 +487,8 @@ evm/calldataload:
   }.
 
 evm/calldatasize:
-  code PC N_36 *
   pc PC *
+  code PC N_36 *
   !inc PC PC' *
   calldatasize Size *
   sh SH
@@ -475,6 +509,7 @@ calldatacopy/z:
     unblock
   }.
 
+% TODO
 calldatacopy/s:
   calldatacopy Ms Cs Ce *
   calldata Cs Size D *
@@ -482,14 +517,14 @@ calldatacopy/s:
   !plus Cs Size Cs' *
   !plus Ms Size Ms'
   -o {
-    memory Ms D *
+    memory Ms Size D *
     calldata Cs Size D *
     calldatacopy Ms' Cs' Ce
   }.
 
 evm/calldatacopy:
-  code PC N_37 *
   pc PC *
+  code PC N_37 *
   !inc PC PC' *
   sh (s (s (s SH))) *
   stack (s (s SH))         Mem_start      *
@@ -511,8 +546,8 @@ evm/calldatacopy:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  40
 
 evm/timestamp:
-  code PC N_42 *
   pc PC *
+  code PC N_42 *
   !inc PC PC' *
   gas GAS *
   !plus (o(i e)) GAS GAS' * %10 = 2 *
@@ -528,8 +563,8 @@ evm/timestamp:
   }.
 
 evm/gaslimit:
-  code PC N_45 *
   pc PC *
+  code PC N_45 *
   !inc PC PC' *
   gas GAS *
   !plus (o(i e)) GAS GAS' * %10 = 2 *
@@ -548,8 +583,8 @@ evm/gaslimit:
 
 
 evm/sload:
-  code PC N_54 *
   pc PC *
+  code PC N_54 *
   !inc PC PC' *
   gas GAS *
   !plus N_200 GAS GAS' *
@@ -566,8 +601,8 @@ evm/sload:
   }.
 
 evm/sstore:
-  code PC N_55 *
   pc PC *
+  code PC N_55 *
   !inc PC PC' *
   gas GAS *
   !inc GAS GAS' *          %simplified
@@ -585,8 +620,8 @@ evm/sstore:
 
 
 evm/jump:
-  code PC N_56 *
   pc PC *
+  code PC N_56 *
   gas GAS *
   !plus N_08 GAS GAS' *
   sh (s SH) *
@@ -599,8 +634,8 @@ evm/jump:
   }.
 
 evm/jumpi_neq:
-  code PC N_57 *
   pc PC *
+  code PC N_57 *
   gas GAS *
   !plus (o(i(o(i e)))) GAS GAS' * %1010 = 10 *
   sh (s (s SH)) *
@@ -615,8 +650,8 @@ evm/jumpi_neq:
   }.
 
 evm/jumpi_eq:
-  code PC N_57 *
   pc PC *
+  code PC N_57 *
   !inc PC PC' *
   gas GAS *
   !plus N_10 GAS GAS' *
@@ -631,8 +666,8 @@ evm/jumpi_eq:
   }.
 
 evm/gas:
-  code PC N_5a *
   pc PC *
+  code PC N_5a *
   !inc PC PC' *
   gas GAS *
   !plus (o (i e)) GAS GAS' * %10 = 2
@@ -646,8 +681,8 @@ evm/gas:
   }.
 
 evm/jumpdest:
-  code PC N_5b *
   pc PC *
+  code PC N_5b *
   !inc PC PC' *
   gas GAS *
   !inc GAS GAS'
@@ -660,8 +695,8 @@ evm/jumpdest:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  60
 
 evm/push1:
-  code PC N_60 *
   pc PC *
+  code PC N_60 *
   gas GAS *
   !plus (i (i e)) GAS GAS' *
   code PC' V *
@@ -701,8 +736,8 @@ evm/push1:
 %  }.
 
 evm/push20:
-  code PC N_73 *
   pc PC *
+  code PC N_73 *
   !inc PC PC' *
   code PC' V *
   !plus N_14 PC' PC_Target *
@@ -722,8 +757,8 @@ evm/push20:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  80
 
 evm/dup1:
-  code PC N_80 *
   pc PC *
+  code PC N_80 *
   !inc PC PC' *
   gas GAS *
   !plus (i(i e)) GAS GAS' * %11 = 3
@@ -739,8 +774,8 @@ evm/dup1:
   }.
 
 evm/dup2:
-  code PC N_81 *
   pc PC *
+  code PC N_81 *
   !inc PC PC' *
   gas GAS *
   !plus (i(i e)) GAS GAS' * %11 = 3
@@ -756,8 +791,8 @@ evm/dup2:
   }.
 
 evm/dup3:
-  code PC N_82 *
   pc PC *
+  code PC N_82 *
   !inc PC PC' *
   gas GAS *
   !plus (i(i e)) GAS GAS' * %11 = 3
@@ -774,8 +809,8 @@ evm/dup3:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  90
 
 evm/swap1:
-  code PC N_90 *
   pc PC *
+  code PC N_90 *
   !inc PC PC' *
   gas GAS *
   !inc GAS GAS' *                  % simplified
@@ -795,8 +830,8 @@ evm/swap1:
 
 % TODO - memory
 evm/log4:
-  code PC N_a4 *
   pc PC *
+  code PC N_a4 *
   !inc PC PC' *
   gas GAS *
   !inc GAS GAS' *
@@ -827,38 +862,39 @@ evm/log4:
 
 % SIMPLIFIED CALL - TODO
 evm/call:
-  code PC N_f1 *
   pc PC *
+  code PC N_f1 *
   !inc PC PC' *
   gas GAS *                        % simplified
   !inc GAS GAS' *                  % simplified
-  sh (s (s (s (s (s (s (s ST))))))) *
-  stack (s (s (s (s (s SH ))))) ADDRESS *
-  stack (s (s (s (s SH )))) VALUE *
-  stack (s (s (s (s (s (s SH)))))) TRASH *
-  stack (s (s (s SH ))) TRASH1 *
-  stack (s (s SH )) TRASH2 *
-  stack (s SH)  TRASH3 *
-  stack SH   TRASH4 *
-  !plus BALANCE VALUE VALUE' *
-  !plus New_Value VALUE Contract_BALANCE *
-  balance ADDRESS BALANCE *
-  address Contract_Address *
-  balance Contract_Address Contract_BALANCE
+  sh    (s (s (s (s (s (s (s SH )))))))           *
+  stack    (s (s (s (s (s (s SH ))))))   GAS_T       *
+  stack       (s (s (s (s (s SH )))))    TO_T        *
+  stack          (s (s (s (s SH ))))     VALUE_T     *
+  stack             (s (s (s SH )))      InOffset_T  *
+  stack                (s (s SH ))       InSize_T    *
+  stack                   (s SH)         OutOffset_T *
+  stack                      SH          OutSize_T
+  % !plus BALANCE VALUE VALUE' *
+  % !plus New_Value VALUE Contract_BALANCE *
+  % balance ADDRESS BALANCE *
+  % address Contract_Address *
+  % balance Contract_Address Contract_BALANCE
   -o {
     code PC N_f1 *
     pc PC' *
     gas GAS' *
     sh (s SH) *
-    address Contract_Address *
-    stack SH N_00 *
-    balance ADDRESS VALUE' *
-    balance Contract_Address New_Value
+    stack SH N_01 *
+    call GAS_T TO_T VALUE_T InOffset_T InSize_T OutOffset_T OutSize_T
+    % address Contract_Address *
+    % balance ADDRESS VALUE' *
+    % balance Contract_Address New_Value
   }.
 
 evm/invalid:
-  code PC N_fe *
-  pc PC
+  pc PC *
+  code PC N_fe
   -o {
     code PC N_fe *
     invalid

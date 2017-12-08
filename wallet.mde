@@ -1,5 +1,5 @@
-#import(bin.mde)
-#import(evm.mde)
+#import(lib/bin.mde)
+#import(lib/evm.mde)
 
 cleanup:
   stop *

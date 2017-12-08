@@ -28,7 +28,7 @@ isNotMember/z:
 
 #trace *
   % execution environment
-  VM *
+  VM                                    * % see evm.mde
 
   % default execution state
   address      Contract_Address         *
@@ -38,18 +38,19 @@ isNotMember/z:
   balance      Contract_Address   WB    *
 
   % code
-  #import(multisig_code2.mde)
+  #import(multisig_code.mde)
 
   % custom execution state
-  !eq          Sender      Member01 *
-  storage      (sha3 Deadline) N_02 *
+  % sender is Member01
+  !eq          Sender      Member01     *
+  storage      ((sha3 (concat (concat (concat e Deadline) Target) Value))) N_02     *
 
   % tx data
-  calldata     N_00 N_20 Deadline   *
-  calldata     N_20 N_20 Target     *
-  calldata     N_40 N_20 Value      *
-  calldatasize N_60                 *
-  callvalue    V                    *
+  calldata     N_00 N_20 Deadline       *
+  calldata     N_20 N_20 Target         *
+  calldata     N_40 N_20 Value          *
+  calldatasize N_60                     *
+  callvalue    V                        *
 
   % local proof assumptions
   !gt Time Deadline  N_00 N_00             % ~(Time > Deadline)

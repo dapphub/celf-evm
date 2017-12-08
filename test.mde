@@ -1,7 +1,9 @@
-#import(bin.mde)
+#import(lib/bin.mde)
 
  debug: bin -> type.
+ #mode debug -.
  debug2: bin -> type.
+ #mode debug2 -.
 
 
 ddd:
@@ -11,16 +13,11 @@ ddd:
 %  !mul N_f5 X Z
 %  !plus Z X N_05
 %  to256 X Z
-  !plus Z N_60 N_21
+  !plus X N_60 Z
   -o {
     debug2 Z
   }.
 
 #trace *
-  %code N_00 N_02 *
-  %pc N_00 *
-  %sh (s(s ee)) *
-  %stack (s ee) N_21 *
-  %stack ee N_60
-  debug X
+  debug N_01
   .
