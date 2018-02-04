@@ -23,7 +23,7 @@ cleanup_stack:
 
 #trace *
   pc                             N_00  *
-  sh                             N_00  *
+  sh                             ee    *
   gas                            N_00  *
 
   storage     N_00               Owner *
