@@ -47,8 +47,10 @@
 
 % f1   CALL          ?
 % fe   INVALID       *
+% fd   REVERT        *
 
 invalid: type.
+revert: type.
 log0: type.
 log1: bin -> type.
 log2: bin -> bin -> type.
@@ -898,4 +900,12 @@ evm/invalid:
   -o {
     code PC N_fe *
     invalid
+  }.
+
+evm/revert:
+  pc PC *
+  code PC N_fd
+  -o {
+    code PC N_fd *
+    revert
   }.
