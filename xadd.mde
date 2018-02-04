@@ -1,0 +1,16 @@
+code N_00  N_60  *   % PUSH1
+code N_01  N_05  *
+code N_02  N_56  *   % JUMP
+code N_03  N_5b  *   % JUMPDEST
+code N_04  N_fd  *   % undefined
+code N_05  N_5b  *   % JUMPDEST
+code N_06  N_81  *   % DUP2
+code N_07  N_01  *   % ADD
+code N_08  N_90  *   % SWAP1
+code N_09  N_81  *   % DUP2
+code N_0a  N_10  *   % LT
+code N_0b  N_60  *   % PUSH1
+code N_0c  N_03  *
+code N_0d  N_57  *   % JUMPI
+code N_0e  N_00  *   % STOP
+
