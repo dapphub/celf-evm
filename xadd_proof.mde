@@ -34,7 +34,8 @@
   % % !gt A N_ff N_00 N_00          A <= N
   % % !gt B N_ff N_00 N_00          B <= N
 
-  !plus B A C                   A + B = C
+  !plus B A C                           *   %  A + B = C
+  !gt B C N_00 N_01
 
 
   % !gt C N_ff N_00 N_00          C <= N
