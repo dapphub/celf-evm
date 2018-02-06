@@ -1,0 +1,55 @@
+% First we define nat - the type of natural numbers
+% A natural number can be zero (z) or a successor/increment (s)
+% of a natural number.
+nat: type.
+z: nat.
+s: nat -> nat.
+
+% abbreviation four
+four : nat = s (s (s (s z))).
+
+% add2 is a function incrementing a natural number twice.
+add2 : nat -> nat = \!x. s (s !x).
+
+% we create a box in which we can store natural numbers
+box: nat -> type.
+
+% TODO: don't know exactly what happens here
+test_box: type =
+{ box (s four) }.
+
+#trace * test_box.
+
+
+plus: nat -> nat -> nat.
+
+#trace * {
+  box (plus (s z) z)
+}.
+
+
+exec: nat -> type.
+
+debug2: nat -> type.
+
+ddd: box X
+  -o {
+    debug2 (add2 !X)
+  }.
+
+
+% TODO - review this
+% this seems to have affine types and a query without cleanup
+% I wonder wether i can utilize this for building queries for
+% the evm without the need for a cleanup
+% https://github.com/chrisamaphone/interactive-lp/blob/master/examples/if-zarf-pants.clf
+
+% Ressearch what pi types mean here:
+% https://github.com/chrisamaphone/interactive-lp/blob/master/examples/if.clf
+
+% fplus seems to combine pattern matching and backwards chaining
+% maybe this can be utilized to get a binary plus working
+% https://github.com/chrisamaphone/interactive-lp/blob/master/examples/platformer.clf
+
+% complex type + complex implementation
+% https://github.com/clf/celf/blob/master/tests/atp.clf
