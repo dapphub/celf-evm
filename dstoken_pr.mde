@@ -1,0 +1,24 @@
+#import(lib/bin.mde)
+#import(lib/evm.mde)
+#import(lib/helper.mde)
+
+#trace *
+
+    @pc                             N_00
+  * @mh                             N_00
+  * @gas                            N_00
+
+    % default execution state
+  * @address      Contract_Address
+  * @sender       Sender
+  * @timestamp    Time
+  * @gaslimit     Gaslimit
+
+  * @sh           ee
+
+  #import(dstoken.mde)
+
+  % tx data
+  * @calldatasize N_00
+  * @callvalue    V
+  .

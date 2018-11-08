@@ -2,54 +2,115 @@
 #import(lib/evm.mde)
 #import(lib/helper.mde)
 
-#trace *
-  % execution environment
-  pc                             N_00   *
-  mh                             N_00   *
-  gas                            N_00   *
+% This shit overflows :(
+max+1: bin = N_010000000000000000000000000000000000000000000000000000000000000000
+.
+%      .
 
-  % default execution state
-  address      Contract_Address         *
-  sender       Sender                   *
-  timestamp    Time                     *
-  gaslimit     Gaslimit                 *
-  balance      Contract_Address   WB    *
+% subst_eq_l: lt A  B
+%          <- lt A' B
+%          <- eq A' A.
+%
+% plus_kommutative: eq (plus A B) (plus B A).
+
+% TODO - write proof term for: lt (plus B A) B
+%        given lt (plus A B) B
+
+% XXX - think about this:
+%       Can I prove this statement with structural induction
+%       over A and B??
+
+% local persistant proofs
+% todo formalize this proof
+smplprof: lt (mod256 (plus B A)) B
+ <- lt max+1 (plus A B)
+ <- lt B max+1
+ <- lt A max+1
+ .
+
+smplprof2: gt (mod256 (plus B A)) B
+ <- gt max+1 (plus A B)
+ <- lt B max+1
+ <- lt A max+1
+ .
+
+
+% #query * * * 20 lt (mod256 (plus B A)) B.
+
+
+#query * * * 1
+  % execution environment
+  % TODO - test if i can have pc as an variable
+    @pc                             N_00
+  * @mh                             N_00
+  * @gas                            N_00
+
+    % default execution state
+  * @address      Contract_Address
+  * @sender       Sender
+  * @timestamp    Time
+  * @gaslimit     Gaslimit
+  * @balance      Contract_Address   WB
 
   % code
   #import(xadd.mde)
 
   % custom execution state
   % sender is Member01
-  sh           (s (s ee))               *
-  stack        (s ee)    A              *
-  stack        ee        B              *
+  * @sh           (s (s ee))
+  * @stack        (s ee)      A
+  * @stack        ee          B
 
 
   % tx data
-  calldatasize N_00                     *
-  callvalue    V                        *
+  * @calldatasize N_00
+  * @callvalue    V
 
-  % local proof assumptions
-
-  % % !gt A N_ff N_00 N_00          A <= N
-  % % !gt B N_ff N_00 N_00          B <= N
-
-  !plus B A C                           *   %  A + B = C
-  !gt B C N_00 N_01
-
-
-  % !gt C N_ff N_00 N_00          C <= N
-  % -> execute
-  %
-  % !gt C N_ff N_00 N_01          C > N
-  % -> throw
-
+  * !lt A max+1
+  * !lt B max+1
+  * !lt max+1 (plus A B)
+  -o {
+    revert
+  }
   .
 
 
-% !gt B C N_00 ???
+
+#trace *
+  % execution environment
+  % TODO - test if i can have pc as an variable
+    @pc                             N_00
+  * @mh                             N_00
+  * @gas                            N_00
+
+    % default execution state
+  * @address      Contract_Address
+  * @sender       Sender
+  * @timestamp    Time
+  * @gaslimit     Gaslimit
+  * @balance      Contract_Address   WB
+
+  % code
+  #import(xadd.mde)
+
+  % custom execution state
+  % sender is Member01
+  * @sh           (s (s ee))
+  * @stack        (s ee)      A
+  * @stack        ee          B
 
 
+  % tx data
+  * @calldatasize N_00
+  * @callvalue    V
+
+  * !lt A max+1
+  * !lt B max+1
+  * !lt max+1 (plus A B)
+  -o {
+    revert
+  }
+  .
 
 %       C = A + B - N * 2^256
 %       A + B > 2^256 && A < 2^256 && B < 2^256

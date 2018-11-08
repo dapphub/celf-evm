@@ -17,7 +17,8 @@ const link = function (filepath) {
   data = data.replace(/N_([[0-9a-f]*)/g, (match, number) => {
     var n = new BN(number, 16);
     var str = n.toString(2);
-    str = "0".repeat(256-str.length) + str;
+    var l = (l = 256 - str.length < 0) ? 0 : l;
+    str = "0".repeat(l) + str;
     str = str.split('').reverse();
     const toType = v => v === "0" ? "o" : "i";
     var toBin = (str) => {

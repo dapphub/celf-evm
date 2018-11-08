@@ -20,8 +20,41 @@ test_box: type =
 
 #trace * test_box.
 
+% plus computation
+plus_c: nat -> nat -> nat -> type.
+plus_c/z: plus_c z N N.
+plus_c/s: plus_c (s X) N (s Z)
+  <- plus_c X N Z.
 
+% plus predicate
 plus: nat -> nat -> nat.
+
+eval: nat -> nat -> type.
+eval_trigger: nat -> nat -> type.
+
+eval_trigger/trigger:
+     eval_trigger (plus X Y) Z
+  <- eval         (plus X Y) Z.
+
+eval/z:    eval z           z.
+eval/s:    eval (s X)      (s X).
+eval/plus: eval (plus X Y)  Z
+  <- eval X X'
+  <- eval Y Y'
+  <- plus_c X' Y' Z
+  .
+
+#trace * {
+  box (plus (s z) z)
+}.
+
+% TODO: every predicate which holds numbers needs an evaluator
+plus_optimizer:
+ box X *
+ eval_trigger X Z
+ -o {
+   box Z
+ }.
 
 #trace * {
   box (plus (s z) z)
@@ -31,6 +64,25 @@ plus: nat -> nat -> nat.
 exec: nat -> type.
 
 debug2: nat -> type.
+
+Atype: type.
+Btype: type.
+
+bwd_test: Atype
+  <- Btype.
+
+step0: box z * Atype
+  -o {
+    box (s z)
+  }.
+step1: box (s z) * Atype
+  -o {
+    box (s (s z))
+  }.
+
+#trace * {
+  box z * !Btype
+}.
 
 ddd: box X
   -o {

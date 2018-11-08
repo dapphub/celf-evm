@@ -32,12 +32,12 @@ cleanup_stack:
   balance     Contract_Address   WB    *
   balance     Owner              OB    *
   !neq        Contract_Address   Owner *
-  !neq        Sender Owner             *
+  !eq        Sender Owner             *
 
   % necessary for the prover
   % TODO - find a way to do it on the fly
-  !plus OB WB TotalValue *
-  !plus N_00 WB WB *
+  !plus_c OB WB TotalValue *
+  !plus_c N_00 WB WB *
 
   code N_00   N_60  * % PUSH1
   code N_01   N_00  * % 0

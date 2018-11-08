@@ -1,0 +1,29 @@
+bool: type.
+
+s1: type.
+s2: type.
+s3: type.
+
+one: bool.
+zro: bool.
+
+not: bool -> bool.
+and: bool -> bool -> bool.
+
+a: bool -> bool -> type.
+b: bool -> bool -> type.
+
+tr1: s1 * a (not (and Y X)) Y -o {s2}.
+
+
+pr1: a (not (and Y X)) Y
+  <-  a Z (and X Y)
+.
+
+% pra: a one = pr1 !as1.
+
+#trace *
+    s1
+  * !a Z (and X Y)
+  .
+

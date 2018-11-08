@@ -1,0 +1,32 @@
+nat: type.
+z: nat.
+s: nat -> nat.
+
+% XXX - cannot query over types!
+% need to do henkin semantics
+% maybe have a look on celf/tests/sill/sill_full.clf
+% and do an induction over nat -> o.
+% XXX - maybe with a derrivable predicate wrapper.
+% derrivable: (nat -> o) -> nat -> type.
+P: nat -> type.
+
+pz: P z.
+
+induction/nat: (P X)
+  <- (P z)
+  % <- ((P A) -> P (s A)))
+  .
+
+#query * * * 1 P X.
+
+
+% smplprof: lt (mod256 (plus B A)) B
+%  <- lt max+1 (plus A B)
+%  <- lt B max+1
+%  <- lt A max+1
+%  .
+
+% XXX - can i do rewrites like this:
+%       plus (s A) B --> (s (plus A B))
+%       maybe i have to work on an object logic
+%       which happens to be linear logic as well

@@ -355,7 +355,7 @@ cleanup_stack:
 %    stack e (o (i e))
 %    }.
 
-#query * * * 1
+#trace *
   pc e *
   sh e *
   gas e *
@@ -387,12 +387,12 @@ cleanup_stack:
   code (o (i (o (o (i e))))) (o (o (o (i e)))) * % 18 gas
   code (i (i (o (o (i e))))) (i (i (o (i e)))) * % 19 call
   code (o (o (i (o (i e))))) (i (o (o (i e))))   % 20 stop
-  -o {
-    storage e Owner *
-    sender Owner *
-    address Contract_Address *
-    balance Owner (o (i e)) *
-    balance Contract_Address e *
-    stop
-  }
+%  -o {
+%    storage e Owner *
+%    sender Owner *
+%    address Contract_Address *
+%    balance Owner (o (i e)) *
+%    balance Contract_Address e *
+%    stop
+%  }
   .

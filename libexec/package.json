@@ -10,6 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "bn.js": "^4.11.8",
-    "colors": "^1.1.2"
+    "cli-color": "^1.2.0",
+    "colors": "^1.2.1",
+    "keccak": "^1.4.0",
+    "web3": "^0.20.6"
   }
 }

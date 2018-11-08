@@ -1,0 +1,48 @@
+!(
+  pc    X
+
+* code  X    jumpdest
+* code  X+1  iszero         % jump if zero
+* code  X+2  jumpi          % jump if zero
+* code  X+3  push1
+* code  X+4  1
+* code  X+5  sub
+* code  X+6  push1
+* code  X+7  X
+* code  X+8  jump
+* code  X+9  jumpdest       % end of the loop
+
+* sh    Y+2
+* stack Y+1  X+9
+* stack Y    V
+
+-o {
+  pc X+9
+* sh Y+2
+* stack Y+1  X+9
+* stack Y    0
+})!
+
+% simulates the code:
+% while (i > 0) {
+%   i := i - 1;
+% }
+
+
+% This can be shown by
+% induction on V: nat
+%   case 0:
+%     reachable - trivial
+%   case P(X) -> P(sX):
+%     let V = sV' and V' >= 0
+%     after one iteraion V' will be on the stack
+%     and we know that it holds vor V'
+
+
+% XXX - I need induction over reachability terms to proof this.
+%     ? does linear induction break soundness/ completeness
+%       or other properties which disallow me to use it?
+
+
+% ! as this transition can be done arbitrary many times, it is cartesian,
+%   and proving induction over cartesian types might be possible

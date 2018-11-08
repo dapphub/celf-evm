@@ -53,5 +53,5 @@ isNotMember/z:
   callvalue    V                        *
 
   % local proof assumptions
-  !gt Time Deadline  N_00 N_00             % ~(Time > Deadline)
+  !gt Time Deadline              % ~(Time > Deadline)
   .

@@ -25,7 +25,7 @@ var traces = data.split("\n\n");
 
 data = traces.map(function (val, i) {
   let ctxArray = val
-    .split(",")
+    .split("\n")
     .map(e => e.trim())
     .filter(e => !((/^code/).test(e)))
     .filter(e => !((/:neq/).test(e)))
@@ -71,6 +71,8 @@ data = traces.map(function (val, i) {
       return row.yellow;
     }
     if(e[0] === "stack") return row.blue;
+    if(e[0] === "revert") return row.red;
+    if(e[0] === "stop") return row.red;
     return row;
   }).join("\n")
 

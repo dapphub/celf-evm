@@ -1,0 +1,35 @@
+nat: type.
+e: nat.
+s: nat -> nat.
+
+two: nat = (s (s e)).
+
+box: nat -> type.
+box2: nat -> nat -> type.
+
+s1: type.
+s2: type.
+s3: type.
+
+step1:
+  s1
+* box X
+  -o {
+    s2
+  * box (s X)
+  }.
+
+% bla: !({s1} & {s2}) -o {s1}.
+
+
+#query * * * 1
+  (s1 & s2) -o {s1 & s2}
+  .
+% #trace *
+%   s1
+% * box two
+%   .
+%
+% #trace * {box2 e two}.
+
+% abst: nat -> nat = \!x. e.
